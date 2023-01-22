@@ -14,7 +14,7 @@ string join_csv_line(vector<string> data);
 
 struct BaseModel {
     shared_ptr<int> id;
-    BaseModel() {};
+    BaseModel();
 
     bool match_query(const shared_ptr<BaseModel> query);
     void parse(const vector<string> data,  int& __pos);
@@ -34,7 +34,7 @@ struct BaseModel {
  */
 template <class T>
 class Database {
-    // static_assert(is_base_of<BaseModel, T>::value, "T must derive from BaseModel");
+    static_assert(is_base_of<BaseModel, T>::value, "T must derive from BaseModel");
 
 private:
     string filepath;
@@ -58,6 +58,7 @@ public:
      * @return vector< shared_ptr<T> > - the search result.
      */
     vector< shared_ptr<T> > find(shared_ptr<T> query, bool one = false);
+    vector< shared_ptr<T> > find(const T query, bool one = false);
 
     /**
      * @brief The find_one model method
@@ -70,6 +71,19 @@ public:
      * @return shared_ptr<T> 
      */
     shared_ptr<T> find_one(shared_ptr<T> query);
+    shared_ptr<T> find_one(const T query);
+
+    /**
+     * @brief The insert model method
+     * 
+     * Inserts the model in database. If model's standard `id` field is empty,
+     * identifier will be evaluated automatically.
+     * 
+     * @param model - the model to insert
+     * @return int - the identifier of inserted model
+     */
+    int insert(shared_ptr<T> model);
+    int insert(const T model);
 
     /**
      * @brief The load data method

@@ -1,7 +1,8 @@
 #include "database.h"
 
 
-vector<string> split_csv_line(string line) {
+vector<string> split_csv_line(string line)
+{
     vector<string> result;
     string curr;
 
@@ -25,7 +26,8 @@ vector<string> split_csv_line(string line) {
 }
 
 
-string join_csv_line(vector<string> data) {
+string join_csv_line(vector<string> data)
+{
     string result;
 
     for (int i = 0; i < data.size(); i++) {
@@ -34,6 +36,9 @@ string join_csv_line(vector<string> data) {
 
     return result;
 }
+
+
+BaseModel::BaseModel() : id(nullptr) {}
 
 
 void BaseModel::parse(const vector<string> data, int& __pos)
@@ -46,7 +51,8 @@ bool BaseModel::match_query(const shared_ptr<BaseModel> query)
     return (query->id == nullptr) || (*query->id == *this->id);
 }
 
-vector<string> BaseModel::dump() {
+vector<string> BaseModel::dump()
+{
     vector<string> result;
     result.push_back(to_string(*this->id));
     return result;
@@ -54,15 +60,17 @@ vector<string> BaseModel::dump() {
 
 
 template <class T>
-Database<T>::Database(string filepath) {
+Database<T>::Database(string filepath)
+{
     this->filepath = filepath;
     this->is_loaded = false;
 }
 
 
 template <class T>
-shared_ptr<T> Database<T>::find_one(shared_ptr<T> query) {
-    auto result = find(query);
+shared_ptr<T> Database<T>::find_one(shared_ptr<T> query)
+{
+    vector< shared_ptr<T> > result = find(query);
     if (!result.size()) {
         throw runtime_error("Not found");
     } else {
@@ -70,9 +78,16 @@ shared_ptr<T> Database<T>::find_one(shared_ptr<T> query) {
     }
 }
 
+template <class T>
+shared_ptr<T> Database<T>::find_one(T query)
+{
+    shared_ptr<T> prepared = (shared_ptr<T>) new T (query);
+    return this->find_one(prepared);
+}
 
 template <class T>
-vector< shared_ptr<T> > Database<T>::find(shared_ptr<T> query, bool one) {
+vector< shared_ptr<T> > Database<T>::find(shared_ptr<T> query, bool one)
+{
     if (!this->is_loaded) throw runtime_error("Find request to the unloaded database");
 
     vector<shared_ptr<T> > result;
@@ -89,7 +104,39 @@ vector< shared_ptr<T> > Database<T>::find(shared_ptr<T> query, bool one) {
 }
 
 template <class T>
-void Database<T>::load() {
+vector<shared_ptr<T> > Database<T>::find(T query, bool one)
+{
+    shared_ptr<T> prepared = (shared_ptr<T>) new T (query);
+    return this->find(prepared, one);
+}
+
+
+template <class T>
+int Database<T>::insert(shared_ptr<T> model)
+{
+    if (model->id == nullptr) {
+        model->id = (shared_ptr<int>) new int (this->data.size());
+    }
+
+    this->data.push_back(model);
+
+    return *model->id;
+}
+
+
+template <class T>
+int Database<T>::insert(const T model)
+{
+    shared_ptr<T> prepared = (shared_ptr<T>) new T (model);
+    return this->insert(prepared);
+}
+
+
+template <class T>
+void Database<T>::load()
+{
+    this->data.clear();
+
     fstream stream (this->filepath);
 
     if (!stream.is_open()) {
@@ -114,7 +161,8 @@ void Database<T>::load() {
 
 
 template <class T>
-void Database<T>::save() {
+void Database<T>::save()
+{
     fstream stream (this->filepath);
 
     if (!stream.is_open()) {
