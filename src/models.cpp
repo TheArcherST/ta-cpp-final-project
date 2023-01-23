@@ -1,6 +1,6 @@
 #include "database.h"
 
-#define macro_query_match(field_name) && ((query->field_name == nullptr) || (*query->field_name == *this->field_name))
+#define macro_query_match(field_name) && ((query->field_name == nullptr) || ((this->field_name == nullptr) ? false : *query->field_name == *this->field_name))
 #define macro_parse(field_name, cast_type, cast_function) this->field_name = (data[__pos++].length()) ? (shared_ptr<cast_type>) new cast_type (cast_function(data[__pos-1])) : nullptr;
 #define macro_parse_raw(field_name) this->field_name = (data[__pos++].length()) ? shared_ptr<string> (new string (data[__pos-1])) : nullptr;
 #define macro_dump(field_name) result.push_back((this->field_name != nullptr) ? to_string(*this->field_name) : "");

@@ -54,7 +54,9 @@ bool BaseModel::match_query(const shared_ptr<BaseModel> query)
 vector<string> BaseModel::dump()
 {
     vector<string> result;
-    result.push_back(to_string(*this->id));
+
+    if (this->id != nullptr) result.push_back(to_string(*this->id));
+
     return result;
 }
 
