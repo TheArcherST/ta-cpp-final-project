@@ -1,4 +1,6 @@
-#include<unistd.h>
+#include <chrono>
+#include <thread>
+
 
 #include "database.cpp"
 #include "models.cpp"
@@ -69,7 +71,7 @@ int client_cli(Console &console, Database<OrderModel> &order_database, shared_pt
     bool is_process_reported = false;
 
     while (true) {
-        sleep(1);
+        this_thread::sleep_for(std::chrono::milliseconds(1000));
         order_database.load();
         shared_ptr<OrderModel> order (order_database.find_one(oreder_q));
         switch (*order->status)
@@ -127,7 +129,7 @@ int cabbie_cli(Console &console, Database<OrderModel> &order_database, shared_pt
         }
         
         if (!is_new_order) {
-            sleep(1);
+            this_thread::sleep_for(std::chrono::milliseconds(1000));
             continue;
         }
         
